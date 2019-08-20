@@ -4,6 +4,8 @@ export default "<section class='g-time-wrapper'>\n" +
 "            <span class='g-current g-hour g-active g-pointer' id='g-hours'>21</span>\n" +
 "            <span class='g-current'>:</span>\n" +
 "            <span class='g-current g-minute g-pointer' id='g-minutes'>37</span>\n" +
+"            <button id='g-time-am' class='g-button-zone g-am g-pointer'>AM</button>\n" +
+"            <button id='g-time-pm' class='g-button-zone g-pm g-pointer'>PM</button>\n" +
 "        </section>\n" +
 "    </header>\n" +
 "\n" +
@@ -18,8 +20,8 @@ export default "<section class='g-time-wrapper'>\n" +
 "\n" +
 "\n" +
 "    <footer class='g-buttons g-flex' id='g-buttons'>\n" +
-"        <button id='g-time-cancel' class='g-button g-cancel g-pointer'>CANCEL</button>\n" +
-"        <button id='g-time-submit' class='g-button g-submit g-pointer'>OK</button>\n" +
+"        <button id='g-time-cancel' class='g-button g-cancel g-pointer'>Cancelar</button>\n" +
+"        <button id='g-time-submit' class='g-button g-submit g-pointer'>Aceptar</button>\n" +
 "    </footer>\n" +
 "\n" +
 "</section>";
