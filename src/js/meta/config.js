@@ -15,7 +15,12 @@ const defaultConfig = {
     clockBackground: "#CFD8DC",
     clockItemColor: "#212121",
     clockItemInnerColor: "#212121",
-    handColor: "#1976D2"
+    handColor: "#1976D2",
+    meridiem: true,
+    labels: {
+        cancel:"Cancel",
+        ok:"Ok",
+    }
 };
 
 const FaceType = {HOURS: "hours", MINUTES: "minutes"};
