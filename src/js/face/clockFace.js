@@ -17,9 +17,9 @@ export default class ClockFace {
         this.size = {};
         this.middle = {};
 
-        this.initViews();
+        this.initViews(options);
         this.initTimeFaces(initialTime);
-        this.createFace();
+        this.createFace(options);
 
         this.hoursFace.items.radius = this.itemsRadius;
 
@@ -29,7 +29,7 @@ export default class ClockFace {
 
     initViews() {
         this.clockElem = document.getElementById(DOM.clockId);
-        this.innerClockElem = document.getElementById(DOM.innerId);
+        this.innerClockElem = (this.options.meridiem) ? null : document.getElementById(DOM.innerId);
         this.handOfAClock = document.getElementById(DOM.handId);
 
         this.clockElem.onmousedown = () => this.isMouseDown = true;
@@ -44,8 +44,10 @@ export default class ClockFace {
         this.clockElem.onmousemove = (e) => this.selectTime(e, false, this.clockElem);
         this.clockElem.onclick = (e) => this.selectTime(e, true, this.clockElem);
 
-        this.innerClockElem.onmousemove = (e) => this.selectTime(e, false, this.innerClockElem);
-        this.innerClockElem.onclick = (e) => this.selectTime(e, true, this.innerClockElem);
+        if (!this.options.meridiem) {
+            this.innerClockElem.onmousemove = (e) => this.selectTime(e, false, this.innerClockElem);
+            this.innerClockElem.onclick = (e) => this.selectTime(e, true, this.innerClockElem);
+        }
     }
 
     initTimeFaces(initialTime) {
@@ -68,7 +70,7 @@ export default class ClockFace {
     }
 
     createFace() {
-        const clockFaceCreator = new ClockFaceCreator(this.clockElem, this.innerClockElem);
+        const clockFaceCreator = new ClockFaceCreator(this.clockElem, this.innerClockElem, this.options);
         clockFaceCreator.create(this.clockItems, this.innerClockItems, this.outerClockItems, this.hoursFace);
         clockFaceCreator.calculateSize(this.clockItems, this.innerClockItems, this.outerClockItems);
 

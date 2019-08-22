@@ -3,19 +3,22 @@ import {css} from "../meta/config";
 
 export default class ClockFaceCreator {
 
-    constructor(clockElem, innerClockElem) {
+    constructor(clockElem, innerClockElem, options) {
         this.clockElem = clockElem;
         this.innerClockElem = innerClockElem;
         this.size = {};
         this.middle = {};
+        this.options = options
     }
 
     create(clockItems, innerClockItems, outerClockItems, face) {
         ClockFaceCreator.doCreate(clockItems, this.clockElem, span => span.classList.add(css.item));
-        ClockFaceCreator.doCreate(innerClockItems, this.innerClockElem, (span, i) => {
-            span.classList.add(css.item, css.inner);
-            span.innerText = face.displayedInner[i];
-        });
+        if (!this.options.meridiem) {
+            ClockFaceCreator.doCreate(innerClockItems, this.innerClockElem, (span, i) => {
+                span.classList.add(css.item, css.inner);
+                span.innerText = face.displayedInner[i];
+            });
+        }
 
         for (let i = 0; i < 60; i++) {
             const span = document.createElement("span");
@@ -41,13 +44,14 @@ export default class ClockFaceCreator {
         this.middle.y = this.size.height / 2;
         this.itemsRadius = this.size.width / 2 - 20;
 
-        const innerWidth = this.innerClockElem.offsetWidth;
-        const innerHeight = this.innerClockElem.offsetHeight;
-        const middleX = innerWidth / 2;
-        const middleY = innerHeight / 2;
-
         ClockFaceCreator.doCalculateSize(this.middle.x, this.middle.y, this.itemsRadius, clockItems);
-        ClockFaceCreator.doCalculateSize(middleX, middleY, this.itemsRadius - 40, innerClockItems);
+        if (!this.options.meridiem) {
+            const innerWidth = this.innerClockElem.offsetWidth;
+            const innerHeight = this.innerClockElem.offsetHeight;
+            const middleX = innerWidth / 2;
+            const middleY = innerHeight / 2;
+            ClockFaceCreator.doCalculateSize(middleX, middleY, this.itemsRadius - 40, innerClockItems);
+        }
         ClockFaceCreator.doCalculateSize(this.middle.x, this.middle.y, this.itemsRadius, outerClockItems);
     }
 
