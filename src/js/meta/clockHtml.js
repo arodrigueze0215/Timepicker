@@ -1,27 +1,37 @@
-export default "<section class='g-time-wrapper'>\n" +
-"    <header class='g-head g-flex' id='g-head'>\n" +
-"        <section class='g-head-content'>\n" +
-"            <span class='g-current g-hour g-active g-pointer' id='g-hours'>21</span>\n" +
-"            <span class='g-current'>:</span>\n" +
-"            <span class='g-current g-minute g-pointer' id='g-minutes'>37</span>\n" +
-"            <button id='g-time-am' class='g-button-zone g-am g-pointer'>AM</button>\n" +
-"            <button id='g-time-pm' class='g-button-zone g-pm g-pointer'>PM</button>\n" +
-"        </section>\n" +
-"    </header>\n" +
-"\n" +
-"\n" +
-"    <section class='g-clock-wrapper g-flex' id='g-clock-wrapper'>\n" +
-"        <div class='g-clock' id='g-clock'>" +
-"            <span class='g-middle-dot' id='g-middle-dot'></span>\n" +
-"            <div class='g-hand-of-a-clock' id='g-hand-of-a-clock'></div>\n" +
-"            <div class='g-clock g-clock-inner' id='g-clock-inner'></div>\n" +
-"        </div>\n" +
-"    </section>\n" +
-"\n" +
-"\n" +
-"    <footer class='g-buttons g-flex' id='g-buttons'>\n" +
-"        <button id='g-time-cancel' class='g-button g-cancel g-pointer'>Cancelar</button>\n" +
-"        <button id='g-time-submit' class='g-button g-submit g-pointer'>Aceptar</button>\n" +
-"    </footer>\n" +
-"\n" +
-"</section>";
+
+export default (options) => {
+    const arrayTemplate = ["<section class='g-time-wrapper'>" ,
+        "    <header class='g-head g-flex' id='g-head'>" ,
+        "        <section class='g-head-content'>" ,
+        "            <span class='g-current g-hour g-active g-pointer' id='g-hours'>21</span>" ,
+        "            <span class='g-current'>:</span>" ,
+        "            <span class='g-current g-minute g-pointer' id='g-minutes'>37</span>"];
+    if (options.meridiem){
+        arrayTemplate.push(["<div class='content-meridiem'>" ,
+            "<span id='g-time-am' class='item-meridiem g-am g-pointer'>AM</span>" ,
+            "<span id='g-time-pm' class='item-meridiem g-pm g-pointer'>PM</span>",
+            "</div>"].join("\n"));
+        
+    }
+    const nextTemplate = ["        </section>" ,
+        "    </header>" ,
+        "" ,
+        "" ,
+        "    <section class='g-clock-wrapper g-flex' id='g-clock-wrapper'>" ,
+        "        <div class='g-clock' id='g-clock'>" ,
+        "            <span class='g-middle-dot' id='g-middle-dot'></span>" ,
+        "            <div class='g-hand-of-a-clock' id='g-hand-of-a-clock'></div>" ,
+        "            <div class='g-clock g-clock-inner' id='g-clock-inner'></div>" ,
+        "        </div>" ,
+        "    </section>" ,
+        "" ,
+        "" ,
+        "    <footer class='g-buttons g-flex' id='g-buttons'>"];
+
+    nextTemplate.push(`
+        <button id='g-time-cancel' class='g-button g-cancel g-pointer'>${options.labels.cancel || ""}</button>
+        <button id='g-time-submit' class='g-button g-submit g-pointer'>${options.labels.ok || ""}</button>
+    `);
+    nextTemplate.push("</footer> </section>");
+    return arrayTemplate.concat(nextTemplate).join("\n");
+};
