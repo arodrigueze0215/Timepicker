@@ -17,7 +17,7 @@ export default class ClockFace {
         this.size = {};
         this.middle = {};
 
-        this.initViews(options);
+        this.initViews();
         this.initTimeFaces(initialTime);
         this.createFace(options);
 

@@ -15,7 +15,9 @@ export default class HoursFace {
     }
 
     onEnter() {
-        this.items.innerClockElem.style.display = "block";
+
+        if (this.items.innerClockElem !== null)
+            this.items.innerClockElem.style.display = "block";
         const isInnerClock = this.hours < 13 && this.hours !== 0;
         const hoursIndex = this.hours % 12;
         this.selected = isInnerClock ? this.items.clockItems[hoursIndex] : this.items.innerClockItems[hoursIndex];
@@ -25,7 +27,8 @@ export default class HoursFace {
     }
 
     onLeave() {
-        this.items.innerClockElem.style.display = "none";
+        if (this.items.innerClockElem !== null)
+            this.items.innerClockElem.style.display = "none";
         if (this.selected) {
             this.removeSelected();
             this.selected = undefined;

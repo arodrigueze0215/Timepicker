@@ -8,7 +8,7 @@ export default class ClockFaceCreator {
         this.innerClockElem = innerClockElem;
         this.size = {};
         this.middle = {};
-        this.options = options
+        this.options = options;
     }
 
     create(clockItems, innerClockItems, outerClockItems, face) {
