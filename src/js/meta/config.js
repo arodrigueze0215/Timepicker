@@ -16,7 +16,7 @@ const defaultConfig = {
     clockItemColor: "#212121",
     clockItemInnerColor: "#212121",
     handColor: "#1976D2",
-    meridiem: true,
+    meridiem: false,
     labels: {
         cancel:"Cancel",
         ok:"Ok",

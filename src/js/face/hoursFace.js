@@ -20,10 +20,17 @@ export default class HoursFace {
             this.items.innerClockElem.style.display = "block";
         const isInnerClock = this.hours < 13 && this.hours !== 0;
         const hoursIndex = this.hours % 12;
-        this.selected = isInnerClock ? this.items.clockItems[hoursIndex] : this.items.innerClockItems[hoursIndex];
+        let radius = this.items.radius;
+        if (this.options.meridiem && !isInnerClock) this.selected = this.items.clockItems[hoursIndex];
+        else {
+            this.selected = isInnerClock ? 
+                this.items.clockItems[hoursIndex] : 
+                this.items.innerClockItems[hoursIndex];
+            radius = radius - 50;
+        }
         this.colorSelected();
 
-        this.updateHours(this.hours, hoursIndex * 30, isInnerClock ? this.items.radius : this.items.radius - 50);
+        this.updateHours(this.hours, hoursIndex * 30, radius);
     }
 
     onLeave() {
@@ -40,7 +47,8 @@ export default class HoursFace {
             this.removeSelected();
 
         const index = Math.round(angle / 30) % 12;
-        this.selected = (elem === this.items.innerClockElem
+        this.selected = (elem === this.items.innerClockElem 
+            && this.items.innerClockElem!== undefined
             ? this.items.innerClockItems
             : this.items.clockItems)[index];
 
@@ -49,7 +57,7 @@ export default class HoursFace {
         const selectedAngle = Math.round(angle / 30) * 30;
 
         this.updateHours(this.hours, selectedAngle,
-            elem === this.items.innerClockElem ? this.items.radius - 50 : this.items.radius);
+            elem === this.items.innerClockElem && this.items.innerClockElem!== undefined ? this.items.radius - 50 : this.items.radius);
     }
 
     colorSelected() {

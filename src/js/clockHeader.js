@@ -42,11 +42,12 @@ export default class ClockHeader {
     }
 
     updateDisplayedTime() {
-        ClockHeader.doUpdateDisplayedTime(this.headerHours, this.time.hours);
+        ClockHeader.doUpdateDisplayedTime(this.headerHours, this.time.hours, this.options.meridiem);
         ClockHeader.doUpdateDisplayedTime(this.headerMinutes, this.time.minutes);
     }
 
-    static doUpdateDisplayedTime(node, value) {
+    static doUpdateDisplayedTime(node, value, meridiem) {
+        if (meridiem) value = value % 12;
         if (value < 10)
             node.innerText = "0" + value;
         else node.innerText = value;
