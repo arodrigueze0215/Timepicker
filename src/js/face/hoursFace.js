@@ -26,7 +26,7 @@ export default class HoursFace {
             this.selected = isInnerClock ? 
                 this.items.clockItems[hoursIndex] : 
                 this.items.innerClockItems[hoursIndex];
-            radius = radius - 50;
+            radius = isInnerClock ?  radius : radius - 50;
         }
         this.colorSelected();
 
