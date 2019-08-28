@@ -36,6 +36,7 @@ export default class ClockHeader {
             }
             if (this.time.meridiem === "am") this.toogleActiveMeridiemAm();
             else if (this.time.meridiem === "pm") this.toogleActiveMeridiemPm();
+            else this.defaultToggleActiveMeridiem();
         }
 
         this.updateDisplayedTime();
@@ -54,8 +55,14 @@ export default class ClockHeader {
         this.toggleActive(this.headerPm, this.headerAm);
         
     }
+
     toogleActiveMeridiemPm() {
         this.toggleActive(this.headerAm, this.headerPm);
+    }
+    
+    defaultToggleActiveMeridiem() {
+        if (this.time < 13) this.toogleActiveMeridiemAm();
+        else this.toogleActiveMeridiemPm();
     }
 
     toggleActive(objectToRemoveClass, objectToAddClass) {
