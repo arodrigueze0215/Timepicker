@@ -52,7 +52,9 @@ const DOM = {
     handId: "g-hand-of-a-clock",
     buttonsId: "g-buttons",
     submitId: "g-time-submit",
-    cancelId: "g-time-cancel"
+    cancelId: "g-time-cancel",
+    gTimeAmId: "g-time-am",
+    gTimePmId: "g-time-pm"
 };
 
 export default {clockId, clockConfig: defaultConfig, FaceType};

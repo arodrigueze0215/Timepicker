@@ -23,6 +23,20 @@ export default class ClockHeader {
             this.toggleActiveToMinutes();
             this.onMinutesClicked();
         };
+        if (this.options.meridiem) {
+            this.headerAm = document.getElementById(DOM.gTimeAmId);
+            this.headerPm = document.getElementById(DOM.gTimePmId);
+            this.headerAm.onclick = () => {
+                this.toogleActiveMeridiemAm();
+                this.time.meridiem = "am";
+            }
+            this.headerPm.onclick = () => {
+                this.toogleActiveMeridiemPm();
+                this.time.meridiem = "pm";
+            }
+            if (this.time.meridiem === "am") this.toogleActiveMeridiemAm();
+            else if (this.time.meridiem === "pm") this.toogleActiveMeridiemPm();
+        }
 
         this.updateDisplayedTime();
         this.toggleActiveToHours();
@@ -36,6 +50,14 @@ export default class ClockHeader {
         this.toggleActive(this.headerMinutes, this.headerHours);
     }
 
+    toogleActiveMeridiemAm() {
+        this.toggleActive(this.headerPm, this.headerAm);
+        
+    }
+    toogleActiveMeridiemPm() {
+        this.toggleActive(this.headerAm, this.headerPm);
+    }
+
     toggleActive(objectToRemoveClass, objectToAddClass) {
         objectToRemoveClass.style.color = this.options.headerColor;
         objectToAddClass.style.color = this.options.headerSelected;
@@ -47,7 +69,7 @@ export default class ClockHeader {
     }
 
     static doUpdateDisplayedTime(node, value, meridiem) {
-        if (meridiem) value = value % 12;
+        if (meridiem && value !== 12) value = value % 12;
         if (value < 10)
             node.innerText = "0" + value;
         else node.innerText = value;
