@@ -9,7 +9,7 @@ export default function showPicker(config = {}) {
     
     const options = Object.assign({}, Config.clockConfig, config);
     createDom(options);
-    const time = getTime(options.time);
+    const time = getTime(options.time, options.meridiem);
 
     const clock = new Clock(options, time);
     styleColors(options);

@@ -17,7 +17,7 @@ export default class Clock {
         this.submitButton = document.getElementById(DOM.submitId);
         this.submitButton.onclick = () => {
             const time = this.time;
-            time.formatted = () => formatTime(time);
+            time.formatted = () => formatTime(time, this.options.meridiem);
             this.options.onSubmit(time);
             Clock.dispose();
         };
