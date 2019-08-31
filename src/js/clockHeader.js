@@ -29,11 +29,11 @@ export default class ClockHeader {
             this.headerAm.onclick = () => {
                 this.toogleActiveMeridiemAm();
                 this.time.meridiem = "am";
-            }
+            };
             this.headerPm.onclick = () => {
                 this.toogleActiveMeridiemPm();
                 this.time.meridiem = "pm";
-            }
+            };
             if (this.time.meridiem === "am") this.toogleActiveMeridiemAm();
             else if (this.time.meridiem === "pm") this.toogleActiveMeridiemPm();
             else this.defaultToggleActiveMeridiem();
@@ -61,7 +61,8 @@ export default class ClockHeader {
     }
     
     defaultToggleActiveMeridiem() {
-        if (this.time < 13) this.toogleActiveMeridiemAm();
+        const { hours } = this.time;
+        if (hours < 13) this.toogleActiveMeridiemAm();
         else this.toogleActiveMeridiemPm();
     }
 
