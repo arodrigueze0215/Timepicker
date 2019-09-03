@@ -1,11 +1,11 @@
-/*! grudus-timepicker | (c) 2017-2017
+/*! grudus-timepicker | (c) 2017-2019
  grudus | Apache-2.0 license (see LICENSE) */
 var hoursRegex = /^([0-1]?[0-9]|2[0-3])$/;
 var minutesRegex = /^([0-5]?[0-9])$/;
 var regex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/;
 
-function extractTime(date) {
-    if (!date) return fromDate(new Date());else if (date instanceof Date) return fromDate(date);else if (hoursRegex.test(date.hours) && minutesRegex.test(date.minutes)) return { hours: parseInt(date.hours), minutes: parseInt(date.minutes) };else if (regex.test(date)) return fromRegex(date);else throw new TypeError("INVALID FORMAT: {" + JSON.stringify(date) + "}.\n            Time must be a Date or 'hh:MM' string or object with 'hours' and 'minutes' fields");
+function extractTime(date, hasMeridiem) {
+    if (!date) return fromDate(new Date(), hasMeridiem);else if (hoursRegex.test(date.hours) && minutesRegex.test(date.minutes) && date.meridiem !== undefined && date.meridiem.length > 0) return { hours: parseInt(date.hours), minutes: parseInt(date.minutes), meridiem: date.meridiem };else if (hoursRegex.test(date.hours) && minutesRegex.test(date.minutes)) return { hours: parseInt(date.hours), minutes: parseInt(date.minutes) };else if (regex.test(date)) return fromRegex(date);else if (date instanceof Date) return fromDate(date, hasMeridiem);else throw new TypeError("INVALID FORMAT: {" + JSON.stringify(date) + "}.\n            Time must be a Date or 'hh:MM' string or object with 'hours' and 'minutes' fields");
 }
 
 function fromRegex(date) {
@@ -13,16 +13,38 @@ function fromRegex(date) {
     return { hours: parseInt(parsed[1]), minutes: parseInt(parsed[2]) };
 }
 
-function fromDate(date) {
-    return { hours: date.getHours(), minutes: date.getMinutes() };
+function fromDate(date, hasMeridiem) {
+    if (hasMeridiem !== undefined && !hasMeridiem) return { hours: date.getHours(), minutes: date.getMinutes() };
+    return getTimeWithMeridiem(date);
 }
 
-var formatTime = function (time) {
-    var extractedTime = extractTime(time);
-    return (extractedTime.hours < 10 ? "0" + extractedTime.hours : extractedTime.hours) + ":" + (extractedTime.minutes < 10 ? "0" + extractedTime.minutes : extractedTime.minutes);
+function getTimeWithMeridiem(date) {
+    var meridiem = "";
+    var hours = date.getHours();
+
+    if (hours < 13) meridiem = "am";else meridiem = "pm";
+
+    if (hours !== 12) hours = hours % 12;
+
+    return { hours: hours, minutes: date.getMinutes(), meridiem: meridiem };
+}
+
+var formatTime = function (time, hasMeridiem) {
+    var extractedTime = extractTime(time, hasMeridiem);
+    return (extractedTime.hours < 10 ? "0" + extractedTime.hours : extractedTime.hours) + ":" + (extractedTime.minutes < 10 ? "0" + extractedTime.minutes : extractedTime.minutes) + " " + (extractedTime.meridiem !== undefined ? extractedTime.meridiem : "");
 };
 
-var clockHtml = "<section class='g-time-wrapper'>\n" + "    <header class='g-head g-flex' id='g-head'>\n" + "        <section class='g-head-content'>\n" + "            <span class='g-current g-hour g-active g-pointer' id='g-hours'>21</span>\n" + "            <span class='g-current'>:</span>\n" + "            <span class='g-current g-minute g-pointer' id='g-minutes'>37</span>\n" + "        </section>\n" + "    </header>\n" + "\n" + "\n" + "    <section class='g-clock-wrapper g-flex' id='g-clock-wrapper'>\n" + "        <div class='g-clock' id='g-clock'>" + "            <span class='g-middle-dot' id='g-middle-dot'></span>\n" + "            <div class='g-hand-of-a-clock' id='g-hand-of-a-clock'></div>\n" + "            <div class='g-clock g-clock-inner' id='g-clock-inner'></div>\n" + "        </div>\n" + "    </section>\n" + "\n" + "\n" + "    <footer class='g-buttons g-flex' id='g-buttons'>\n" + "        <button id='g-time-cancel' class='g-button g-cancel g-pointer'>CANCEL</button>\n" + "        <button id='g-time-submit' class='g-button g-submit g-pointer'>OK</button>\n" + "    </footer>\n" + "\n" + "</section>";
+var clockHtml = (function (options) {
+    var arrayTemplate = ["<section class='g-time-wrapper'>", "    <header class='g-head g-flex' id='g-head'>", "        <section class='g-head-content'>", "            <span class='g-current g-hour g-active g-pointer' id='g-hours'>21</span>", "            <span class='g-current'>:</span>", "            <span class='g-current g-minute g-pointer' id='g-minutes'>37</span>"];
+    if (options.meridiem) {
+        arrayTemplate.push(["<div class='content-meridiem'>", "<span id='g-time-am' class='item-meridiem g-am g-pointer'>AM</span>", "<span id='g-time-pm' class='item-meridiem g-pm g-pointer'>PM</span>", "</div>"].join("\n"));
+    }
+    var nextTemplate = ["        </section>", "    </header>", "", "", "    <section class='g-clock-wrapper g-flex' id='g-clock-wrapper'>", "        <div class='g-clock' id='g-clock'>", "            <span class='g-middle-dot' id='g-middle-dot'></span>", "            <div class='g-hand-of-a-clock' id='g-hand-of-a-clock'></div>", "            <div class='g-clock g-clock-inner' id='g-clock-inner'></div>", "        </div>", "    </section>", "", "", "    <footer class='g-buttons g-flex' id='g-buttons'>"];
+
+    nextTemplate.push("\n        <button id='g-time-cancel' class='g-button g-cancel g-pointer'>" + (options.labels.cancel || "") + "</button>\n        <button id='g-time-submit' class='g-button g-submit g-pointer'>" + (options.labels.ok || "") + "</button>\n    ");
+    nextTemplate.push("</footer> </section>");
+    return arrayTemplate.concat(nextTemplate).join("\n");
+});
 
 var clockId = "grudus-clock";
 
@@ -39,7 +61,12 @@ var defaultConfig = {
     clockBackground: "#CFD8DC",
     clockItemColor: "#212121",
     clockItemInnerColor: "#212121",
-    handColor: "#1976D2"
+    handColor: "#1976D2",
+    meridiem: false,
+    labels: {
+        cancel: "Cancel",
+        ok: "Ok"
+    }
 };
 
 var FaceType = { HOURS: "hours", MINUTES: "minutes" };
@@ -71,7 +98,9 @@ var DOM = {
     handId: "g-hand-of-a-clock",
     buttonsId: "g-buttons",
     submitId: "g-time-submit",
-    cancelId: "g-time-cancel"
+    cancelId: "g-time-cancel",
+    gTimeAmId: "g-time-am",
+    gTimePmId: "g-time-pm"
 };
 
 var Config = { clockId: clockId, clockConfig: defaultConfig, FaceType: FaceType };
@@ -128,6 +157,19 @@ var ClockHeader = function () {
                 _this.toggleActiveToMinutes();
                 _this.onMinutesClicked();
             };
+            if (this.options.meridiem) {
+                this.headerAm = document.getElementById(DOM.gTimeAmId);
+                this.headerPm = document.getElementById(DOM.gTimePmId);
+                this.headerAm.onclick = function () {
+                    _this.toogleActiveMeridiemAm();
+                    _this.time.meridiem = "am";
+                };
+                this.headerPm.onclick = function () {
+                    _this.toogleActiveMeridiemPm();
+                    _this.time.meridiem = "pm";
+                };
+                if (this.time.meridiem === "am") this.toogleActiveMeridiemAm();else if (this.time.meridiem === "pm") this.toogleActiveMeridiemPm();else this.defaultToggleActiveMeridiem();
+            }
 
             this.updateDisplayedTime();
             this.toggleActiveToHours();
@@ -143,6 +185,23 @@ var ClockHeader = function () {
             this.toggleActive(this.headerMinutes, this.headerHours);
         }
     }, {
+        key: "toogleActiveMeridiemAm",
+        value: function toogleActiveMeridiemAm() {
+            this.toggleActive(this.headerPm, this.headerAm);
+        }
+    }, {
+        key: "toogleActiveMeridiemPm",
+        value: function toogleActiveMeridiemPm() {
+            this.toggleActive(this.headerAm, this.headerPm);
+        }
+    }, {
+        key: "defaultToggleActiveMeridiem",
+        value: function defaultToggleActiveMeridiem() {
+            var hours = this.time.hours;
+
+            if (hours < 13) this.toogleActiveMeridiemAm();else this.toogleActiveMeridiemPm();
+        }
+    }, {
         key: "toggleActive",
         value: function toggleActive(objectToRemoveClass, objectToAddClass) {
             objectToRemoveClass.style.color = this.options.headerColor;
@@ -151,12 +210,13 @@ var ClockHeader = function () {
     }, {
         key: "updateDisplayedTime",
         value: function updateDisplayedTime() {
-            ClockHeader.doUpdateDisplayedTime(this.headerHours, this.time.hours);
+            ClockHeader.doUpdateDisplayedTime(this.headerHours, this.time.hours, this.options.meridiem);
             ClockHeader.doUpdateDisplayedTime(this.headerMinutes, this.time.minutes);
         }
     }], [{
         key: "doUpdateDisplayedTime",
-        value: function doUpdateDisplayedTime(node, value) {
+        value: function doUpdateDisplayedTime(node, value, meridiem) {
+            if (meridiem && value !== 12) value = value % 12;
             if (value < 10) node.innerText = "0" + value;else node.innerText = value;
         }
     }]);
@@ -254,18 +314,23 @@ var HoursFace = function () {
     createClass(HoursFace, [{
         key: "onEnter",
         value: function onEnter() {
-            this.items.innerClockElem.style.display = "block";
+
+            if (this.items.innerClockElem !== null) this.items.innerClockElem.style.display = "block";
             var isInnerClock = this.hours < 13 && this.hours !== 0;
             var hoursIndex = this.hours % 12;
-            this.selected = isInnerClock ? this.items.clockItems[hoursIndex] : this.items.innerClockItems[hoursIndex];
+            var radius = this.items.radius;
+            if (this.options.meridiem && !isInnerClock) this.selected = this.items.clockItems[hoursIndex];else {
+                this.selected = isInnerClock ? this.items.clockItems[hoursIndex] : this.items.innerClockItems[hoursIndex];
+                radius = isInnerClock ? radius : radius - 50;
+            }
             this.colorSelected();
 
-            this.updateHours(this.hours, hoursIndex * 30, isInnerClock ? this.items.radius : this.items.radius - 50);
+            this.updateHours(this.hours, hoursIndex * 30, radius);
         }
     }, {
         key: "onLeave",
         value: function onLeave() {
-            this.items.innerClockElem.style.display = "none";
+            if (this.items.innerClockElem !== null) this.items.innerClockElem.style.display = "none";
             if (this.selected) {
                 this.removeSelected();
                 this.selected = undefined;
@@ -277,13 +342,13 @@ var HoursFace = function () {
             if (this.selected) this.removeSelected();
 
             var index = Math.round(angle / 30) % 12;
-            this.selected = (elem === this.items.innerClockElem ? this.items.innerClockItems : this.items.clockItems)[index];
+            this.selected = (elem === this.items.innerClockElem && this.items.innerClockElem !== undefined ? this.items.innerClockItems : this.items.clockItems)[index];
 
             this.colorSelected();
             this.hours = parseInt(this.selected.innerText);
             var selectedAngle = Math.round(angle / 30) * 30;
 
-            this.updateHours(this.hours, selectedAngle, elem === this.items.innerClockElem ? this.items.radius - 50 : this.items.radius);
+            this.updateHours(this.hours, selectedAngle, elem === this.items.innerClockElem && this.items.innerClockElem !== undefined ? this.items.radius - 50 : this.items.radius);
         }
     }, {
         key: "colorSelected",
@@ -345,13 +410,14 @@ Promise.prototype.delay = function (fn, t) {
 var Utils = { toRadians: toRadians, toDegrees: toDegrees, findMousePosition: findMousePosition };
 
 var ClockFaceCreator = function () {
-    function ClockFaceCreator(clockElem, innerClockElem) {
+    function ClockFaceCreator(clockElem, innerClockElem, options) {
         classCallCheck(this, ClockFaceCreator);
 
         this.clockElem = clockElem;
         this.innerClockElem = innerClockElem;
         this.size = {};
         this.middle = {};
+        this.options = options;
     }
 
     createClass(ClockFaceCreator, [{
@@ -360,10 +426,12 @@ var ClockFaceCreator = function () {
             ClockFaceCreator.doCreate(clockItems, this.clockElem, function (span) {
                 return span.classList.add(css.item);
             });
-            ClockFaceCreator.doCreate(innerClockItems, this.innerClockElem, function (span, i) {
-                span.classList.add(css.item, css.inner);
-                span.innerText = face.displayedInner[i];
-            });
+            if (!this.options.meridiem) {
+                ClockFaceCreator.doCreate(innerClockItems, this.innerClockElem, function (span, i) {
+                    span.classList.add(css.item, css.inner);
+                    span.innerText = face.displayedInner[i];
+                });
+            }
 
             for (var i = 0; i < 60; i++) {
                 var span = document.createElement("span");
@@ -381,13 +449,14 @@ var ClockFaceCreator = function () {
             this.middle.y = this.size.height / 2;
             this.itemsRadius = this.size.width / 2 - 20;
 
-            var innerWidth = this.innerClockElem.offsetWidth;
-            var innerHeight = this.innerClockElem.offsetHeight;
-            var middleX = innerWidth / 2;
-            var middleY = innerHeight / 2;
-
             ClockFaceCreator.doCalculateSize(this.middle.x, this.middle.y, this.itemsRadius, clockItems);
-            ClockFaceCreator.doCalculateSize(middleX, middleY, this.itemsRadius - 40, innerClockItems);
+            if (!this.options.meridiem) {
+                var innerWidth = this.innerClockElem.offsetWidth;
+                var innerHeight = this.innerClockElem.offsetHeight;
+                var middleX = innerWidth / 2;
+                var middleY = innerHeight / 2;
+                ClockFaceCreator.doCalculateSize(middleX, middleY, this.itemsRadius - 40, innerClockItems);
+            }
             ClockFaceCreator.doCalculateSize(this.middle.x, this.middle.y, this.itemsRadius, outerClockItems);
         }
     }], [{
@@ -435,7 +504,7 @@ var ClockFace = function () {
 
         this.initViews();
         this.initTimeFaces(initialTime);
-        this.createFace();
+        this.createFace(options);
 
         this.hoursFace.items.radius = this.itemsRadius;
 
@@ -449,7 +518,7 @@ var ClockFace = function () {
             var _this = this;
 
             this.clockElem = document.getElementById(DOM.clockId);
-            this.innerClockElem = document.getElementById(DOM.innerId);
+            this.innerClockElem = this.options.meridiem ? null : document.getElementById(DOM.innerId);
             this.handOfAClock = document.getElementById(DOM.handId);
 
             this.clockElem.onmousedown = function () {
@@ -477,12 +546,14 @@ var ClockFace = function () {
                 return _this.selectTime(e, true, _this.clockElem);
             };
 
-            this.innerClockElem.onmousemove = function (e) {
-                return _this.selectTime(e, false, _this.innerClockElem);
-            };
-            this.innerClockElem.onclick = function (e) {
-                return _this.selectTime(e, true, _this.innerClockElem);
-            };
+            if (!this.options.meridiem) {
+                this.innerClockElem.onmousemove = function (e) {
+                    return _this.selectTime(e, false, _this.innerClockElem);
+                };
+                this.innerClockElem.onclick = function (e) {
+                    return _this.selectTime(e, true, _this.innerClockElem);
+                };
+            }
         }
     }, {
         key: "initTimeFaces",
@@ -514,7 +585,7 @@ var ClockFace = function () {
     }, {
         key: "createFace",
         value: function createFace() {
-            var clockFaceCreator = new ClockFaceCreator(this.clockElem, this.innerClockElem);
+            var clockFaceCreator = new ClockFaceCreator(this.clockElem, this.innerClockElem, this.options);
             clockFaceCreator.create(this.clockItems, this.innerClockItems, this.outerClockItems, this.hoursFace);
             clockFaceCreator.calculateSize(this.clockItems, this.innerClockItems, this.outerClockItems);
 
@@ -638,7 +709,7 @@ var Clock = function () {
             this.submitButton.onclick = function () {
                 var time = _this.time;
                 time.formatted = function () {
-                    return formatTime(time);
+                    return formatTime(time, _this.options.meridiem);
                 };
                 _this.options.onSubmit(time);
                 Clock.dispose();
@@ -750,22 +821,22 @@ function changeColor(className, color) {
 function showPicker() {
     var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    createDom();
 
     var options = Object.assign({}, Config.clockConfig, config);
-    var time = extractTime(options.time);
+    createDom(options);
+    var time = extractTime(options.time, options.meridiem);
 
     var clock = new Clock(options, time);
     styleColors(options);
     clock.onStart();
 }
 
-function createDom() {
+function createDom(options) {
     if (document.getElementById(Config.clockId)) throw Error("There is already one running grudus-timepicker instance!");
 
     var clockDiv = document.createElement("div");
     clockDiv.id = Config.clockId;
-    clockDiv.innerHTML = clockHtml;
+    clockDiv.innerHTML = clockHtml(options);
     document.body.appendChild(clockDiv);
 }
 
