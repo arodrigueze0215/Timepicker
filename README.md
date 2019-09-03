@@ -30,7 +30,12 @@ defaultConfig = {
     clockBackground: "#CFD8DC",
     clockItemColor: "#212121",
     clockItemInnerColor: "#212121",
-    handColor: "#1976D2"
+    handColor: "#1976D2",
+    meridiem: false,
+    labels: {
+        cancel:"Cancel",
+        ok:"Ok",
+    }
 };
 ````
 
@@ -89,3 +94,18 @@ import Timepicker from "path/to/grudus-timepicker/dist/grudus-timepicker.js";
 ````
 
 You can set initial time by passing `time` field in argument. `time` may be a `Date` object, an object `{hours: 12, minutes: 44}` or a string in format `HH:mm`. If you want to learn more, visit [customization section](https://grudus.github.io/Timepicker/#customization)
+
+## Additional options
+
+You can use `24h/12h` mode using the `meridiem` config. Set to true to use AM/PM or leave it as false to use 24hrs.
+
+You can override buttons text using `label` config. As example I want labels on spanish so I can set:
+
+```
+{
+    labels: {
+        cancel:"Cancelar",
+        ok:"Aceptar",
+    }
+}
+```
